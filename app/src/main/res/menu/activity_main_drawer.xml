@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_listap"
+            android:icon="@drawable/ic_menu_lista"
+            android:title="Lista de Productos" />
+        <item
+            android:id="@+id/nav_consulta"
+            android:icon="@drawable/ic_consulta"
+            android:title="Consulta " />
+        <item
+            android:id="@+id/nav_agregar"
+            android:icon="@drawable/ic_agregar"
+            android:title="Agregar " />
+        <item
+            android:id="@+id/nav_actualizar"
+            android:icon="@drawable/ic_actualizar"
+            android:title="Editar " />
+
+        <item
+            android:id="@+id/nav_eliminar"
+            android:icon="@drawable/ic_eliminar"
+            android:title="Eliminar " />
+    </group>
+
+</menu>

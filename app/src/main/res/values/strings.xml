@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Medicamentos</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_manual">Manual de Usuario</string>
+    <string name="logo_shopping">Logo Shopping Spot</string>
+
+    <string name="fragment_agregar_titulo">Agregar Producto</string>
+    <string name="fragment_agregar_id">ID</string>
+    <string name="fragment_agregar_nombre">Nombre de Producto</string>
+    <string name="fragment_agregar_marca">Marca de Producto</string>
+    <string name="fragment_agregar_pesoinicio">Peso Inicial del Producto</string>
+    <string name="fragment_agregar_pesoactual">Peso Actual del Producto</string>
+    <string name="fragment_agregar_caducidad">Caducidad del Producto</string>
+    <string name="fragment_agregar_b_agregar">AGREGAR PRODUCTO</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

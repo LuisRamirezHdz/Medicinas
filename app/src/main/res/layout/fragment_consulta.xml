@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.Consulta">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="12dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:textSize="30dp"
+            android:layout_margin="10dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Consulta"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:paddingTop="12dp"
+            android:text="Seleccione el nombre del medicamento que desea consultar:"/>
+    <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Indicación terapeutica:"
+            android:textSize="20dp"
+
+            android:paddingTop="12dp"/>
+
+            <TextView
+                android:id="@+id/txt_itM"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:layout_gravity="center_horizontal" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Dosis:"
+            android:textSize="20dp"
+            android:paddingTop="15dp"/>
+
+            <TextView
+                android:id="@+id/txt_dosiM"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:layout_gravity="center_horizontal"
+                android:inputType="textPersonName"
+                />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Número de veces al dia:"
+            android:textSize="20dp"
+            android:paddingTop="15dp"/>
+
+            <TextView
+                android:id="@+id/txt_vadM"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:layout_gravity="center_horizontal"
+               />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Hora(Para la siguiente toma):"
+            android:textSize="20dp"
+            android:paddingTop="15dp"/>
+
+            <TextView
+                android:id="@+id/txt_hrM"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:layout_gravity="center_horizontal"
+               />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Periodo:"
+            android:textSize="20dp"
+            android:paddingTop="15dp"/>
+
+            <TextView
+                android:id="@+id/txt_pedM"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:layout_gravity="center_horizontal"
+                android:inputType="textPersonName"
+                 />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nombre del Dr:"
+            android:textSize="20dp"
+            android:paddingTop="12dp"/>
+
+            <TextView
+                android:id="@+id/txt_nDrM"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:layout_gravity="center_horizontal"
+                 />
+
+
+    </LinearLayout>
+
+</FrameLayout>

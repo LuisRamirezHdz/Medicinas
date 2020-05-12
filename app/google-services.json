@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "488986390464",
+    "firebase_url": "https://medicamentos-a67e9.firebaseio.com",
+    "project_id": "medicamentos-a67e9",
+    "storage_bucket": "medicamentos-a67e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488986390464:android:e9a1b8320fac9d1082a225",
+        "android_client_info": {
+          "package_name": "com.example.project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488986390464-m63rp304mijauldsi5pqauu7td0spf6q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.project",
+            "certificate_hash": "6b9ca2cf371bdbbf9307e04b96293ac15a921478"
+          }
+        },
+        {
+          "client_id": "488986390464-atido8i5kj01l00evg1s4jcjo4louhki.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkYtSSKWHHBiO6GfOxu1G8ZbpGG6xSJeY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488986390464-atido8i5kj01l00evg1s4jcjo4louhki.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
