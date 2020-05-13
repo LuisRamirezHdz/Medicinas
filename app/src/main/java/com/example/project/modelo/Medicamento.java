@@ -4,6 +4,7 @@ public class Medicamento {
     private String ID;
     private String nombre;
     private String indicacionTerapeutica;
+    private String Envase;
     private String dosis;
     private String vecesAlDia;
     private String hora;
@@ -11,6 +12,14 @@ public class Medicamento {
     private String nombreDr;
 
     public Medicamento() {
+    }
+
+    public String getEnvase() {
+        return Envase;
+    }
+
+    public void setEnvase(String envase) {
+        Envase = envase;
     }
 
     public String getID() {

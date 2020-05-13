@@ -12,10 +12,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.modelo.Medicamento;
 import com.google.firebase.FirebaseApp;
@@ -37,6 +40,8 @@ public class Consulta extends Fragment {
     View vista;
 
     TextView itM,  dosiM, vadM, peD, ndrM, hrM;
+
+    ImageView imgM;
 
     //Conexión a firebase
     FirebaseDatabase firebaseDatabase;
@@ -74,6 +79,7 @@ public class Consulta extends Fragment {
         peD =(TextView)vista. findViewById(R.id.txt_pedM);
         ndrM =(TextView)vista. findViewById(R.id.txt_nDrM);
         hrM =(TextView)vista. findViewById(R.id.txt_hrM);
+        imgM=(ImageView)vista.findViewById(R.id.img_foto);
 
         inicializarFirebase();
         listarDatos();
@@ -105,6 +111,12 @@ public class Consulta extends Fragment {
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             medicamentoSelected = (Medicamento) parent.getItemAtPosition(position);
                             itM.setText(medicamentoSelected.getIndicacionTerapeutica());
+                            Uri descargarFoto = Uri.parse(medicamentoSelected.getEnvase());
+                            Glide.with(getActivity())
+                                    .load(descargarFoto)
+                                    .fitCenter()
+                                    .centerCrop()
+                                    .into(imgM);
                             dosiM.setText(medicamentoSelected.getDosis());
                             vadM.setText(medicamentoSelected.getVecesAlDia());
                             hrM.setText(medicamentoSelected.getHora());
