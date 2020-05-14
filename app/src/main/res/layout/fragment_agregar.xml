@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.Agregar">
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -49,12 +51,23 @@
 
         <Button
             android:id="@+id/btn_selefoto"
-            android:text="Seleccionar foto envase"
+            android:text="Seleccione la foto del envase"
             android:paddingTop="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <ImageView
             android:id="@+id/img_foto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btn_selefotoP"
+            android:text="Seleccione la foto de la presentación"
+            android:paddingTop="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <ImageView
+            android:id="@+id/img_fotoP"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -145,5 +158,6 @@
             android:text="Guardar medicamento" />
 
     </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

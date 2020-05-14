@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.Eliminar">
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,7 +45,28 @@
             android:layout_height="wrap_content"
             android:textSize="20dp"
             android:layout_gravity="center_horizontal" />
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Foto del envase:"
+            android:textSize="20dp"
+            android:paddingTop="12dp"/>
+        <ImageView
+            android:id="@+id/img_foto"
+            android:layout_gravity="center"
+            android:layout_width="280px"
+            android:layout_height="180px"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Foto de la presentación:"
+            android:textSize="20dp"
+            android:paddingTop="12dp"/>
+        <ImageView
+            android:id="@+id/img_foto2"
+            android:layout_gravity="center"
+            android:layout_width="280px"
+            android:layout_height="180px"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -129,5 +152,5 @@
             android:text="Confirmar eliminación" />
 
     </LinearLayout>
-
+    </ScrollView>
 </FrameLayout>

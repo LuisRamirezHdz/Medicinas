@@ -3,7 +3,6 @@ package com.example.project.Fragments;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -21,15 +20,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import com.example.project.ConnectionSQLiteHelper;
 import com.example.project.MainActivity;
 import com.example.project.R;
-import com.example.project.Utilidades.Utilidades;
 import com.example.project.modelo.Medicamento;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -44,36 +40,34 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Stack;
 import java.util.UUID;
 
-import static com.example.project.Utilidades.Utilidades.CAMPO_CADUCIDAD;
-import static com.example.project.Utilidades.Utilidades.CAMPO_ID;
-import static com.example.project.Utilidades.Utilidades.CAMPO_MARCA;
-import static com.example.project.Utilidades.Utilidades.CAMPO_NOMBRE;
-import static com.example.project.Utilidades.Utilidades.CAMPO_PESO_ACTUAL;
-import static com.example.project.Utilidades.Utilidades.CAMPO_PESO_INICIAL;
 
 public class Agregar extends Fragment {
+    //Manejar el fragment
     View vista;
-
+    //Elementos del formulario
     EditText nomM, itM, dosiM, vadM, peD, hrM, ndrM;
     Button btn;
      Spinner spinner;
      static final String[] paths = {"dia(s)", "semana(s)", "mese(s)", "año(s)"};
 
-     //Lo necesario para subir foto
-     Button seleccionar;
-     ImageView foto;
+     //Lo necesario para subir fotos
+     Button seleccionar, seleccionar2;
+     ImageView foto, foto2;
      StorageReference storageReference;
-     DatabaseReference imgref;
+    StorageReference storageReference2;
      ProgressDialog cargando;
      Bitmap thumb_bitmap = null;
+    Bitmap thumb_bitmap2 = null;
+
+     boolean botonimagen=true;
+
+     Uri downloaduri1, downloaduri2;
 
     //Conexión a firebase
     FirebaseDatabase firebaseDatabase;
@@ -85,14 +79,6 @@ public class Agregar extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Agregar.
-     */
     // TODO: Rename and change types and number of parameters
     public static Agregar newInstance(String param1, String param2) {
         Agregar fragment = new Agregar();
@@ -152,9 +138,16 @@ public class Agregar extends Fragment {
         //Imagen
         foto = (ImageView) vista.findViewById(R.id.img_foto);
         seleccionar = (Button) vista.findViewById(R.id.btn_selefoto);
-        imgref = FirebaseDatabase.getInstance().getReference().child("Fotos subidas");
-        storageReference = FirebaseStorage.getInstance().getReference().child("img_comprimidas");
+        //imgref = FirebaseDatabase.getInstance().getReference().child("Fotos subidas");
+        storageReference = FirebaseStorage.getInstance().getReference().child("img_envase");
         cargando = new ProgressDialog(getContext());
+
+        //Imagen 2
+        foto2 = (ImageView) vista.findViewById(R.id.img_fotoP);
+        seleccionar2 = (Button) vista.findViewById(R.id.btn_selefotoP);
+        //imgref = FirebaseDatabase.getInstance().getReference().child("Fotos subidas");
+        storageReference2 = FirebaseStorage.getInstance().getReference().child("img_presentacion");
+        //cargando = new ProgressDialog(getContext());
 
 
         inicializarFirebase();
@@ -165,7 +158,7 @@ public class Agregar extends Fragment {
                 Intent intent = CropImage.activity()
                         .setAspectRatio(16,9)
                         .getIntent(getContext());
-
+                botonimagen = true;
                 startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
 
 
@@ -175,16 +168,66 @@ public class Agregar extends Fragment {
 
 
 
+        seleccionar2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // CropImage.startPickImageActivity(getActivity());
+                Intent intent2 = CropImage.activity()
+                        .setAspectRatio(16,9)
+                        .getIntent(getContext());
+                botonimagen = false;
+                startActivityForResult(intent2, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
+
+
+
+            }
+        });
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String n = nomM.getText().toString();
+                String p = peD.getText().toString();
+                String d = dosiM.getText().toString();
+                String v = vadM.getText().toString();
+                String nd = ndrM.getText().toString();
+                String hr = hrM.getText().toString();
+                String i = itM.getText().toString();
+
+
+
+                if(n.equals("") || i.equals("")|| d.equals("")||v.equals("")||p.equals("")||nd.equals("")||hr.equals("")){
+                    validacion();
+                }else {
+
+                    Medicamento m =new Medicamento();
+                    m.setID(UUID.randomUUID().toString());
+                    m.setNombre(n);
+                    m.setIndicacionTerapeutica(i);
+                    m.setUrlEnvase(downloaduri1.toString());//Foto
+                    m.setUrlPresentacion(downloaduri2.toString());//Foto
+                    m.setDosis(d);
+                    m.setVecesAlDia(v);
+                    m.setPeriodoEnDias(p +periodo);
+                    m.setHora(hr);
+                    m.setNombreDr(nd);
+                    databaseReference.child("Medicamento").child(m.getID()).setValue(m);
+                    Toast.makeText(getContext(), "Agregado", Toast.LENGTH_LONG).show();
+                    //Regresar a la lista
+                    ((MainActivity)getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.frame_contenedor, new Listado()).commit();
+
+
+
+
+                }
+
+            }
+        });
+
+
+
 
         return vista;
-    }
-    private void limpiarCajas() {
-        nomM.setText("");
-        peD.setText("");
-        dosiM.setText("");
-        vadM.setText("");
-        ndrM.setText("");
-        itM.setText("");
     }
 
     private void validacion() {
@@ -214,11 +257,9 @@ public class Agregar extends Fragment {
     private void inicializarFirebase() {
         FirebaseApp.initializeApp(vista.getContext());
         firebaseDatabase = FirebaseDatabase.getInstance();
-        /*Implementar persistencia(solo funciona con con un activity)
-        firebaseDatabase.setPersistenceEnabled(true);*/
         databaseReference = firebaseDatabase.getReference();
     }
-
+    //Cuando se seleccione un boton de imagen
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -239,102 +280,106 @@ public class Agregar extends Fragment {
 
                 File url = new File(resultUri.getPath());
 
-                Picasso.with(getContext()).load(url).into(foto);
-
-                //comprimiendo imagen
-                try{
-                    thumb_bitmap =new Compressor(vista.getContext())
-                            .setMaxWidth(640)
-                            .setMaxHeight(480)
-                            .setQuality(90)
-                            .compressToBitmap(url);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                thumb_bitmap.compress(Bitmap.CompressFormat.JPEG,90, byteArrayOutputStream);
-                final byte [] thumb_byte=byteArrayOutputStream.toByteArray();
-                //fin del compresor....
-                int p = (int) (Math.random() *25 +1 ); int s = (int) (Math.random() *25 +1 );
-                int t = (int) (Math.random() *25 +1 ); int c = (int) (Math.random() *25 +1 );
-                int numero1 = (int) (Math.random() *1012 +2111 );
-                int numero2 = (int) (Math.random() *1012 +2111 );
-
-                String [] elementos = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-                        "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
-                final String aleatorio = elementos[p]+elementos[s]+numero1+elementos[t] +elementos[c] + numero2 + "comprimido.jpg";
-
-                btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String n = nomM.getText().toString();
-                        String p = peD.getText().toString();
-                        String d = dosiM.getText().toString();
-                        String v = vadM.getText().toString();
-                        String nd = ndrM.getText().toString();
-                        String hr = hrM.getText().toString();
-                        String i = itM.getText().toString();
-
-
-
-                        if(n.equals("") || i.equals("")|| d.equals("")||v.equals("")||p.equals("")||nd.equals("")||hr.equals("")){
-                            validacion();
-                        }else {
-                            cargando.setTitle("Subiendo foto...");
-                            cargando.setMessage("Espere por favor...");
-                            cargando.show();
-
-                            final StorageReference ref = storageReference.child(aleatorio);
-                            UploadTask uploadTask = ref.putBytes(thumb_byte);
-
-                            //Subir imagen en storage...
-                            Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-                                @Override
-                                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                                    if(!task.isSuccessful()){
-                                        throw Objects.requireNonNull(task.getException());
-                                    }
-                                    return ref.getDownloadUrl();
-                                }
-                            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Uri> task) {
-                                    Uri downloaduri = task.getResult();
-
-                                    String n = nomM.getText().toString();
-                                    String p = peD.getText().toString();
-                                    String d = dosiM.getText().toString();
-                                    String v = vadM.getText().toString();
-                                    String nd = ndrM.getText().toString();
-                                    String hr = hrM.getText().toString();
-                                    String i = itM.getText().toString();
-
-                                    Medicamento m =new Medicamento();
-                                    m.setID(UUID.randomUUID().toString());
-                                    m.setNombre(n);
-                                    m.setIndicacionTerapeutica(i);
-                                    m.setEnvase(downloaduri.toString());//Foto
-                                    m.setDosis(d);
-                                    m.setVecesAlDia(v);
-                                    m.setPeriodoEnDias(p +periodo);
-                                    m.setHora(hr);
-                                    m.setNombreDr(nd);
-                                    databaseReference.child("Medicamento").child(m.getID()).setValue(m);
-
-                                    cargando.dismiss();
-                                    Toast.makeText(getContext(), "Agregado", Toast.LENGTH_LONG).show();
-                                    //Regresar a la lista
-                                    ((MainActivity)getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.frame_contenedor, new Listado()).commit();
-
-                                }
-                            });
-
-
-                        }
-
+                if(botonimagen==true){
+                    Picasso.with(getContext()).load(url).into(foto);
+                    //comprimiendo imagen
+                    try{
+                        thumb_bitmap =new Compressor(vista.getContext())
+                                .setMaxWidth(640)
+                                .setMaxHeight(480)
+                                .setQuality(90)
+                                .compressToBitmap(url);
+                    }catch (IOException e){
+                        e.printStackTrace();
                     }
-                });
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    thumb_bitmap.compress(Bitmap.CompressFormat.JPEG,90, byteArrayOutputStream);
+                    final byte [] thumb_byte=byteArrayOutputStream.toByteArray();
+                    //fin del compresor....
+                    int p = (int) (Math.random() *25 +1 ); int s = (int) (Math.random() *25 +1 );
+                    int t = (int) (Math.random() *25 +1 ); int c = (int) (Math.random() *25 +1 );
+                    int numero1 = (int) (Math.random() *1012 +2111 );
+                    int numero2 = (int) (Math.random() *1012 +2111 );
+
+                    String [] elementos = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+                            "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+
+                    cargando.setTitle("Subiendo foto...");
+                    cargando.setMessage("Espere por favor...");
+                    cargando.show();
+                    final String nombreAl1 = elementos[p]+elementos[s]+numero1+elementos[t] +elementos[c] + numero2 + "comprimido.jpg";
+                    final StorageReference ref = storageReference.child(nombreAl1);
+                    UploadTask uploadTask = ref.putBytes(thumb_byte);
+                    //Subir imagen en storage...
+                    Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if(!task.isSuccessful()){
+                                throw Objects.requireNonNull(task.getException());
+                            }
+                            return ref.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            downloaduri1 = task.getResult();
+
+                            cargando.dismiss();
+                        }
+                    });
+
+                }else{
+                    Picasso.with(getContext()).load(url).into(foto2);
+                    //comprimiendo imagen
+                    try{
+                        thumb_bitmap2 =new Compressor(vista.getContext())
+                                .setMaxWidth(640)
+                                .setMaxHeight(480)
+                                .setQuality(90)
+                                .compressToBitmap(url);
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    thumb_bitmap2.compress(Bitmap.CompressFormat.JPEG,90, byteArrayOutputStream);
+                    final byte [] thumb_byte=byteArrayOutputStream.toByteArray();
+                    //fin del compresor....
+                    int p = (int) (Math.random() *25 +1 ); int s = (int) (Math.random() *25 +1 );
+                    int t = (int) (Math.random() *25 +1 ); int c = (int) (Math.random() *25 +1 );
+                    int numero1 = (int) (Math.random() *1012 +2111 );
+                    int numero2 = (int) (Math.random() *1012 +2111 );
+
+                    String [] elementos = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+                            "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+
+                    cargando.setTitle("Subiendo foto...");
+                    cargando.setMessage("Espere por favor...");
+                    cargando.show();
+                    final String nombreAl2 = elementos[s]+elementos[p]+numero1+elementos[c] +elementos[t] + numero2 + "comprimido.jpg";
+                    final StorageReference ref = storageReference2.child(nombreAl2);
+                    UploadTask uploadTask = ref.putBytes(thumb_byte);
+                    //Subir imagen en storage...
+                    Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if(!task.isSuccessful()){
+                                throw Objects.requireNonNull(task.getException());
+                            }
+                            return ref.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            downloaduri2 = task.getResult();
+
+                            cargando.dismiss();
+                        }
+                    });
+                }
+
+
 
             }
         }

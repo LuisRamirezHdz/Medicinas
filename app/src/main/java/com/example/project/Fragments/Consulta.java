@@ -41,7 +41,7 @@ public class Consulta extends Fragment {
 
     TextView itM,  dosiM, vadM, peD, ndrM, hrM;
 
-    ImageView imgM;
+    ImageView imgM, img2;
 
     //Conexión a firebase
     FirebaseDatabase firebaseDatabase;
@@ -80,6 +80,7 @@ public class Consulta extends Fragment {
         ndrM =(TextView)vista. findViewById(R.id.txt_nDrM);
         hrM =(TextView)vista. findViewById(R.id.txt_hrM);
         imgM=(ImageView)vista.findViewById(R.id.img_foto);
+        img2=(ImageView)vista.findViewById(R.id.img_foto2);
 
         inicializarFirebase();
         listarDatos();
@@ -90,8 +91,6 @@ public class Consulta extends Fragment {
     private void inicializarFirebase() {
         FirebaseApp.initializeApp(vista.getContext());
         firebaseDatabase = FirebaseDatabase.getInstance();
-        /*Implementar persistencia(solo funciona con con un activity)
-        firebaseDatabase.setPersistenceEnabled(true);*/
         databaseReference = firebaseDatabase.getReference();
     }
     private void listarDatos() {
@@ -111,12 +110,18 @@ public class Consulta extends Fragment {
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             medicamentoSelected = (Medicamento) parent.getItemAtPosition(position);
                             itM.setText(medicamentoSelected.getIndicacionTerapeutica());
-                            Uri descargarFoto = Uri.parse(medicamentoSelected.getEnvase());
+                            Uri descargarFoto = Uri.parse(medicamentoSelected.getUrlEnvase());
                             Glide.with(getActivity())
                                     .load(descargarFoto)
                                     .fitCenter()
                                     .centerCrop()
                                     .into(imgM);
+                            Uri descargarFoto2 = Uri.parse(medicamentoSelected.getUrlPresentacion());
+                            Glide.with(getActivity())
+                                    .load(descargarFoto2)
+                                    .fitCenter()
+                                    .centerCrop()
+                                    .into(img2);
                             dosiM.setText(medicamentoSelected.getDosis());
                             vadM.setText(medicamentoSelected.getVecesAlDia());
                             hrM.setText(medicamentoSelected.getHora());

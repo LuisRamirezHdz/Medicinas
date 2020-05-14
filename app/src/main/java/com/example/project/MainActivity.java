@@ -8,9 +8,9 @@ import com.example.project.Fragments.Eliminar;
 import com.example.project.Fragments.Listado;
 import com.example.project.Fragments.Agregar;
 import com.example.project.Fragments.Actualizar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import androidx.fragment.app.Fragment;
-import android.view.View;
+
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -20,9 +20,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.project.Fragments.Fragment_Agregar_Producto;
-import com.example.project.Fragments.Fragment_Lista_productos;
-import com.example.project.R;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -72,7 +69,6 @@ MainActivity extends AppCompatActivity implements NavigationView.OnNavigationIte
 
         //Poner icono en action bar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.drawable.medicine);
     }
 
 

@@ -12,10 +12,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.modelo.Medicamento;
@@ -39,6 +41,7 @@ public class Eliminar extends Fragment {
     View vista;
 
     TextView itM,  dosiM, vadM, peD, ndrM, hrM;
+    ImageView imgM, img2;
     Button btn;
     //Conexión a firebase
     FirebaseDatabase firebaseDatabase;
@@ -76,6 +79,8 @@ public class Eliminar extends Fragment {
         peD =(TextView)vista. findViewById(R.id.txt_pedM);
         ndrM =(TextView)vista. findViewById(R.id.txt_nDrM);
         hrM =(TextView)vista. findViewById(R.id.txt_hrM);
+        imgM=(ImageView)vista.findViewById(R.id.img_foto);
+        img2=(ImageView)vista.findViewById(R.id.img_foto2);
 
 
         btn=(Button)vista.findViewById(R.id.b_eliminar);
@@ -89,7 +94,6 @@ public class Eliminar extends Fragment {
                 m.setID(medicamentoSelected.getID());
                 databaseReference.child("Medicamento").child(m.getID()).removeValue();
                 Toast.makeText(getContext(), "Medicamento eliminado", Toast.LENGTH_LONG).show();
-                //limpiarCajas();
                 //Regresar a la lista
                 ((MainActivity)getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.frame_contenedor, new Listado()).commit();
 
@@ -105,8 +109,6 @@ public class Eliminar extends Fragment {
     private void inicializarFirebase() {
         FirebaseApp.initializeApp(vista.getContext());
         firebaseDatabase = FirebaseDatabase.getInstance();
-        /*Implementar persistencia(solo funciona con con un activity)
-        firebaseDatabase.setPersistenceEnabled(true);*/
         databaseReference = firebaseDatabase.getReference();
     }
     private void listarDatos() {
@@ -126,6 +128,18 @@ public class Eliminar extends Fragment {
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             medicamentoSelected = (Medicamento) parent.getItemAtPosition(position);
                             itM.setText(medicamentoSelected.getIndicacionTerapeutica());
+                            Uri descargarFoto = Uri.parse(medicamentoSelected.getUrlEnvase());
+                            Glide.with(getActivity())
+                                    .load(descargarFoto)
+                                    .fitCenter()
+                                    .centerCrop()
+                                    .into(imgM);
+                            Uri descargarFoto2 = Uri.parse(medicamentoSelected.getUrlPresentacion());
+                            Glide.with(getActivity())
+                                    .load(descargarFoto2)
+                                    .fitCenter()
+                                    .centerCrop()
+                                    .into(img2);
                             dosiM.setText(medicamentoSelected.getDosis());
                             vadM.setText(medicamentoSelected.getVecesAlDia());
                             hrM.setText(medicamentoSelected.getHora());

@@ -4,7 +4,8 @@ public class Medicamento {
     private String ID;
     private String nombre;
     private String indicacionTerapeutica;
-    private String Envase;
+    private String urlEnvase;
+    private String urlPresentacion;
     private String dosis;
     private String vecesAlDia;
     private String hora;
@@ -14,12 +15,20 @@ public class Medicamento {
     public Medicamento() {
     }
 
-    public String getEnvase() {
-        return Envase;
+    public String getUrlEnvase() {
+        return urlEnvase;
     }
 
-    public void setEnvase(String envase) {
-        Envase = envase;
+    public void setUrlEnvase(String envase) {
+        urlEnvase = envase;
+    }
+
+    public String getUrlPresentacion() {
+        return urlPresentacion;
+    }
+
+    public void setUrlPresentacion(String urlPresentacion) {
+        this.urlPresentacion = urlPresentacion;
     }
 
     public String getID() {
