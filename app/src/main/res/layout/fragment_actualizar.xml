@@ -117,19 +117,23 @@
         </com.google.android.material.textfield.TextInputLayout>
 
 
-        <com.google.android.material.textfield.TextInputLayout
+        <Button
+            android:id="@+id/change_notification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Hora(Para la primera dosis del día)">
+            android:layout_marginTop="20dp"
+            android:text="Selecciona para cambiar hora(de la primera dosis del día)"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"/>
+        <TextView
+            android:id="@+id/notifications_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="12:00"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:textSize="25sp"/>
 
-            <EditText
-                android:id="@+id/txt_hrM"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="time"
-                android:paddingTop="15dp" />
-        </com.google.android.material.textfield.TextInputLayout>
 
 
         <com.google.android.material.textfield.TextInputLayout

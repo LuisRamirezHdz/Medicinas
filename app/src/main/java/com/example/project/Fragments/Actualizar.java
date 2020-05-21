@@ -1,8 +1,13 @@
 package com.example.project.Fragments;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -22,9 +27,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.project.Alarm.AlarmReceiver;
 import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.modelo.Medicamento;
@@ -48,9 +56,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static android.content.Context.ALARM_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,7 +71,7 @@ import java.util.UUID;
 public class Actualizar extends Fragment {
     View vista;
 
-    EditText nomM, itM, dosiM, vadM, peD,hrM, ndrM;
+    EditText nomM, itM, dosiM, vadM, peD, ndrM;
     ImageView imgM, img2;
     //Conexión a firebase
     FirebaseDatabase firebaseDatabase;
@@ -79,10 +90,19 @@ public class Actualizar extends Fragment {
     ProgressDialog cargando;
     Bitmap thumb_bitmap = null;
     Bitmap thumb_bitmap2 = null;
-
     boolean botonimagen=true;
-
     Uri downloaduri1, downloaduri2;
+
+
+    //Time picker
+
+    String finalHour, finalMinute;
+    Button btnCambiarHora;
+    TextView notificationsTime;
+    Calendar today = Calendar.getInstance();
+
+    //foto
+    int nofoto1=0, nofoto2=0;
 
     public Actualizar() {
         // Required empty public constructor
@@ -111,7 +131,8 @@ public class Actualizar extends Fragment {
         vadM =(EditText)vista. findViewById(R.id.txt_vadM);
         peD =(EditText)vista. findViewById(R.id.txt_pedM);
         ndrM =(EditText)vista. findViewById(R.id.txt_nDrM);
-        hrM =(EditText)vista.findViewById(R.id.txt_hrM);
+        notificationsTime = (TextView) vista.findViewById(R.id.notifications_time);
+        btnCambiarHora = (Button)vista.findViewById(R.id.change_notification);
         imgM=(ImageView)vista.findViewById(R.id.img_foto);
         img2=(ImageView)vista.findViewById(R.id.img_foto2);
 
@@ -128,42 +149,55 @@ public class Actualizar extends Fragment {
         btn=(Button)vista.findViewById(R.id.b_actualizar);
         inicializarFirebase();
         listarDatos();
-
-
-        inicializarFirebase();
-
+        //*********************************   BOTONES ************************************************
+        //Para seleccionar la primera imagen
         seleccionar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // CropImage.startPickImageActivity(getActivity());
                 Intent intent = CropImage.activity()
                         .setAspectRatio(16,9)
                         .getIntent(getContext());
                 botonimagen = true;
                 startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
-
-
-
             }
         });
-
-
-
+        //Para seleccionar la segunda imagen
         seleccionar2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // CropImage.startPickImageActivity(getActivity());
                 Intent intent2 = CropImage.activity()
                         .setAspectRatio(16,9)
                         .getIntent(getContext());
                 botonimagen = false;
                 startActivityForResult(intent2, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
-
-
-
             }
         });
-
+        //Time picker
+        btnCambiarHora.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(vista.getContext(), new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        finalHour = "" + selectedHour;
+                        finalMinute = "" + selectedMinute;
+                        if (selectedHour < 10) finalHour = "0" + selectedHour;
+                        if (selectedMinute < 10) finalMinute = "0" + selectedMinute;
+                        notificationsTime.setText(finalHour + ":" + finalMinute);
+                        today.set(Calendar.HOUR_OF_DAY, selectedHour);
+                        today.set(Calendar.MINUTE, selectedMinute);
+                        today.set(Calendar.SECOND, 0);
+                    }
+                }, hour, minute, true);//Yes 24 hour time
+                mTimePicker.setTitle(getString(R.string.select_time));
+                mTimePicker.show();
+            }
+        });
+        //Actualizar el medicamento
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -172,7 +206,7 @@ public class Actualizar extends Fragment {
                 String d = dosiM.getText().toString();
                 String v = vadM.getText().toString();
                 String nd = ndrM.getText().toString();
-                String hr = hrM.getText().toString();
+                String hr = notificationsTime.getText().toString();
                 String i = itM.getText().toString();
                 if(n.equals("") || i.equals("")|| d.equals("")||v.equals("")||p.equals("")||nd.equals("")||hr.equals("")){
                     validacion();
@@ -181,15 +215,24 @@ public class Actualizar extends Fragment {
                     m.setID(medicamentoSelected.getID());
                     m.setNombre(nomM.getText().toString().trim());
                     m.setIndicacionTerapeutica(itM.getText().toString().trim());
-                    m.setUrlEnvase(downloaduri1.toString());//Foto
-                    m.setUrlPresentacion(downloaduri2.toString());//Foto
+                    if(nofoto1==0){
+                        m.setUrlEnvase(medicamentoSelected.getUrlEnvase());//Foto
+                    }else {
+                        m.setUrlEnvase(downloaduri1.toString());//Foto
+                    }
+                    if(nofoto2==0){
+                        m.setUrlPresentacion(medicamentoSelected.getUrlPresentacion());//Foto
+                    }else {
+                        m.setUrlPresentacion(downloaduri2.toString());//Foto
+                    }
                     m.setDosis(dosiM.getText().toString().trim());
                     m.setVecesAlDia(vadM.getText().toString().trim());
                     m.setPeriodoEnDias(peD.getText().toString().trim());
-                    m.setHora(hrM.getText().toString().trim());
+                    m.setHora(notificationsTime.getText().toString().trim());
                     m.setNombreDr(ndrM.getText().toString().trim());
                     databaseReference.child("Medicamento").child(m.getID()).setValue(m);
                     Toast.makeText(getContext(), "Actualizado", Toast.LENGTH_LONG).show();
+
                     //limpiarCajas();
                     //Regresar a la lista
                     ((MainActivity)getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.frame_contenedor, new Listado()).commit();
@@ -209,7 +252,6 @@ public class Actualizar extends Fragment {
         String d = dosiM.getText().toString();
         String v = vadM.getText().toString();
         String nd = ndrM.getText().toString();
-        String hr = hrM.getText().toString();
         String i = itM.getText().toString();
 
         if(n.equals("")){
@@ -220,8 +262,6 @@ public class Actualizar extends Fragment {
             dosiM.setError("Required");
         }else if(v.equals("")){
             vadM.setError("Required");
-        }else if(hr.equals("")){
-            hrM.setError("Required");
         }else if(p.equals("")){
             peD.setError("Required");
         }else if(nd.equals("")){
@@ -268,9 +308,10 @@ public class Actualizar extends Fragment {
                                     .into(img2);
                             dosiM.setText(medicamentoSelected.getDosis());
                             vadM.setText(medicamentoSelected.getVecesAlDia());
-                            hrM.setText(medicamentoSelected.getHora());
+                            notificationsTime.setText(medicamentoSelected.getHora());
                             peD.setText(medicamentoSelected.getPeriodoEnDias());
                             ndrM.setText(medicamentoSelected.getNombreDr());
+
                         }
 
                         @Override
@@ -292,6 +333,9 @@ public class Actualizar extends Fragment {
             }
         });
     }
+
+
+
     //Cuando se seleccione un boton de imagen
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -313,7 +357,7 @@ public class Actualizar extends Fragment {
 
                 if(botonimagen==true){
                     Uri resultUri = result.getUri();
-
+                    nofoto1=1;
                     File url = new File(resultUri.getPath());
                     Picasso.with(getContext()).load(url).into(imgM);
                     //comprimiendo imagen
@@ -365,7 +409,7 @@ public class Actualizar extends Fragment {
 
                 }else if(botonimagen == false){
                     Uri resultUri = result.getUri();
-
+                    nofoto2=1;
                     File url = new File(resultUri.getPath());
                     Picasso.with(getContext()).load(url).into(img2);
                     //comprimiendo imagen

@@ -1,8 +1,13 @@
 package com.example.project.Fragments;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -22,8 +27,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.project.Alarm.AlarmReceiver;
 import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.modelo.Medicamento;
@@ -43,16 +51,19 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Objects;
 import java.util.UUID;
+
+import static android.content.Context.ALARM_SERVICE;
 
 
 public class Agregar extends Fragment {
     //Manejar el fragment
     View vista;
     //Elementos del formulario
-    EditText nomM, itM, dosiM, vadM, peD, hrM, ndrM;
-    Button btn;
+     EditText nomM, itM, dosiM, vadM, peD, ndrM;
+     Button btn;
      Spinner spinner;
      static final String[] paths = {"dia(s)", "semana(s)", "mese(s)", "año(s)"};
 
@@ -60,20 +71,28 @@ public class Agregar extends Fragment {
      Button seleccionar, seleccionar2;
      ImageView foto, foto2;
      StorageReference storageReference;
-    StorageReference storageReference2;
+     StorageReference storageReference2;
      ProgressDialog cargando;
      Bitmap thumb_bitmap = null;
-    Bitmap thumb_bitmap2 = null;
-
+     Bitmap thumb_bitmap2 = null;
      boolean botonimagen=true;
-
      Uri downloaduri1, downloaduri2;
 
     //Conexión a firebase
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
 
+    //Numero de días
+    int periodoendias;
     String periodo;
+
+    //Time picker
+
+    String finalHour, finalMinute;
+    Button btnCambiarHora;
+    TextView notificationsTime;
+    Calendar today = Calendar.getInstance();
+
 
     public Agregar() {
         // Required empty public constructor
@@ -87,14 +106,16 @@ public class Agregar extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         vista=inflater.inflate(R.layout.fragment_agregar,container,false);
-
+        //Se muestra las opciones del periodo
         spinner = (Spinner)vista.findViewById(R.id.spinner);
         ArrayAdapter<String>adapter = new ArrayAdapter<String>(vista.getContext(),android.R.layout.simple_spinner_item,paths);
 
@@ -106,17 +127,20 @@ public class Agregar extends Fragment {
                 switch (position) {
                     case 0:
                         periodo = " día(s)";
+                        periodoendias = 1;
                         break;
                     case 1:
                         periodo = " semana(s)";
+                        periodoendias=7;
                         break;
                     case 2:
                         periodo = " mese(s)";
+                        periodoendias=30;
                         break;
                     case 3:
                         periodo = " año(s)";
+                        periodoendias=365;
                         break;
-
                 }
             }
 
@@ -132,57 +156,69 @@ public class Agregar extends Fragment {
         vadM =(EditText)vista. findViewById(R.id.txt_vadM);
         peD =(EditText)vista. findViewById(R.id.txt_pedM);
         ndrM =(EditText)vista. findViewById(R.id.txt_nDrM);
-        hrM =(EditText)vista.findViewById(R.id.txt_hrM);
+        notificationsTime = (TextView) vista.findViewById(R.id.notifications_time);
+        btnCambiarHora = (Button)vista.findViewById(R.id.change_notification);
         btn=(Button)vista.findViewById(R.id.b_agregar);
 
-        //Imagen
+        //Imagenes
         foto = (ImageView) vista.findViewById(R.id.img_foto);
+        foto2 = (ImageView) vista.findViewById(R.id.img_fotoP);
         seleccionar = (Button) vista.findViewById(R.id.btn_selefoto);
-        //imgref = FirebaseDatabase.getInstance().getReference().child("Fotos subidas");
+        seleccionar2 = (Button) vista.findViewById(R.id.btn_selefotoP);
         storageReference = FirebaseStorage.getInstance().getReference().child("img_envase");
+        storageReference2 = FirebaseStorage.getInstance().getReference().child("img_presentacion");
         cargando = new ProgressDialog(getContext());
 
-        //Imagen 2
-        foto2 = (ImageView) vista.findViewById(R.id.img_fotoP);
-        seleccionar2 = (Button) vista.findViewById(R.id.btn_selefotoP);
-        //imgref = FirebaseDatabase.getInstance().getReference().child("Fotos subidas");
-        storageReference2 = FirebaseStorage.getInstance().getReference().child("img_presentacion");
-        //cargando = new ProgressDialog(getContext());
-
-
         inicializarFirebase();
+        //*********************************   BOTONES ************************************************
+        //Para seleccionar la primera imagen
         seleccionar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // CropImage.startPickImageActivity(getActivity());
                 Intent intent = CropImage.activity()
                         .setAspectRatio(16,9)
                         .getIntent(getContext());
                 botonimagen = true;
                 startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
-
-
-
             }
         });
-
-
-
+        //Para seleccionar la segunda imagen
         seleccionar2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // CropImage.startPickImageActivity(getActivity());
                 Intent intent2 = CropImage.activity()
                         .setAspectRatio(16,9)
                         .getIntent(getContext());
                 botonimagen = false;
                 startActivityForResult(intent2, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
-
-
-
             }
         });
-
+        //Time picker
+        btnCambiarHora.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(vista.getContext(), new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        finalHour = "" + selectedHour;
+                        finalMinute = "" + selectedMinute;
+                        if (selectedHour < 10) finalHour = "0" + selectedHour;
+                        if (selectedMinute < 10) finalMinute = "0" + selectedMinute;
+                        notificationsTime.setText(finalHour + ":" + finalMinute);
+                        today.set(Calendar.HOUR_OF_DAY, selectedHour);
+                        today.set(Calendar.MINUTE, selectedMinute);
+                        today.set(Calendar.SECOND, 0);
+                    }
+                }, hour, minute, true);//Yes 24 hour time
+                mTimePicker.setTitle(getString(R.string.select_time));
+                mTimePicker.show();
+            }
+        });
+        //Agregar el nuevo medicamento
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -191,15 +227,11 @@ public class Agregar extends Fragment {
                 String d = dosiM.getText().toString();
                 String v = vadM.getText().toString();
                 String nd = ndrM.getText().toString();
-                String hr = hrM.getText().toString();
+                String hr = notificationsTime.getText().toString();
                 String i = itM.getText().toString();
-
-
-
                 if(n.equals("") || i.equals("")|| d.equals("")||v.equals("")||p.equals("")||nd.equals("")||hr.equals("")){
                     validacion();
                 }else {
-
                     Medicamento m =new Medicamento();
                     m.setID(UUID.randomUUID().toString());
                     m.setNombre(n);
@@ -211,32 +243,83 @@ public class Agregar extends Fragment {
                     m.setPeriodoEnDias(p +periodo);
                     m.setHora(hr);
                     m.setNombreDr(nd);
+                   //Guarda los datos para el mensaje de la notificación
+                    SharedPreferences preferences=getActivity().getSharedPreferences("AlarmaMedicamento",Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor=preferences.edit();
+                    editor.putString("nombre", n);
+                    editor.putString("dosis", d);
+                    //Guardo el id con el nombre del medicamento
+                    int alarmID = (10000*Integer.parseInt(v)) + (100* Integer.parseInt(finalHour))+Integer.parseInt(finalMinute);
+                    editor.putInt(n, alarmID);
+                    editor.commit();
+                    programarAlarmas(alarmID, v, p);
                     databaseReference.child("Medicamento").child(m.getID()).setValue(m);
                     Toast.makeText(getContext(), "Agregado", Toast.LENGTH_LONG).show();
                     //Regresar a la lista
                     ((MainActivity)getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.frame_contenedor, new Listado()).commit();
-
-
-
-
                 }
-
             }
         });
-
-
-
-
         return vista;
     }
 
+    private void programarAlarmas(int ID, String v, String p) {
+        Calendar aux = Calendar.getInstance();
+        aux.set(Calendar.MINUTE,  today.get(Calendar.MINUTE));
+        aux.set(Calendar.SECOND, 0);
+        //Programar las alarmas de acuerdo al periodo de días
+         periodoendias= periodoendias * Integer.parseInt(p);
+
+        //Programar las alarmas que habra en un día
+        int vecesAlDia=Integer.parseInt(v);
+        int incrementoHoras=0, horas=0;
+        switch (vecesAlDia){
+            case 2:
+                horas = 12;
+                break;
+            case 3:
+                horas = 8;
+                break;
+            case 4:
+                horas = 6;
+                break;
+            case 6:
+                horas = 4;
+                break;
+            case 8:
+                horas = 3;
+                break;
+            case 12:
+                horas = 2;
+                break;
+            default:
+                break;
+        }
+        for (int j=0; j<periodoendias; j++){
+            for(int i=0; i<vecesAlDia; i++){
+                //Programara la hora en la que sonara de acuerdo al número de veces
+                aux.set(Calendar.HOUR_OF_DAY, today.get(Calendar.HOUR_OF_DAY) + incrementoHoras);
+                //Programa la alarma
+                setAlarm(ID, aux.getTimeInMillis(), vista.getContext());
+                //Cambia la hora de la siguiente de ese día
+                incrementoHoras+=horas;
+                //Cambiar ID
+                ID+=1;
+            }
+            //Programara el día en la que sonara de acuerdo al número de días
+            aux.add(Calendar.DAY_OF_YEAR, 1);//Vamos cambiando de día
+            //Restablecer hora
+            aux.set(Calendar.HOUR_OF_DAY, today.get(Calendar.HOUR_OF_DAY));
+        }
+    }
+
+    //Confirmar que los campos están vacios
     private void validacion() {
         String n = nomM.getText().toString();
         String p = peD.getText().toString();
         String d = dosiM.getText().toString();
         String v = vadM.getText().toString();
         String nd = ndrM.getText().toString();
-        String hr = hrM.getText().toString();
         String i = itM.getText().toString();
 
         if(n.equals("")){
@@ -383,6 +466,17 @@ public class Agregar extends Fragment {
 
             }
         }
+    }
+
+    private static  void setAlarm(int i, long timestamp, Context ctx){
+        AlarmManager alarmManager = (AlarmManager)
+                ctx.getSystemService(ALARM_SERVICE);
+        Intent alarmIntent = new Intent(ctx, AlarmReceiver.class);
+        PendingIntent pendingIntent;
+        pendingIntent = PendingIntent.getBroadcast(ctx, i, alarmIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+        alarmIntent.setData((Uri.parse("custom://" + System.currentTimeMillis())));
+        alarmManager.set(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent);
     }
 
     public interface OnFragmentInteractionListener {
