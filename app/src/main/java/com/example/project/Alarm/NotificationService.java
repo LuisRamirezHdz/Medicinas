@@ -77,7 +77,7 @@ public class NotificationService extends IntentService {
             pendingIntent = PendingIntent.getActivity(context, 0, mIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentTitle(getString(R.string.app_name)).setCategory(Notification.CATEGORY_SERVICE)
                     .setSmallIcon(R.drawable.ic_notification)   // required
-                    .setContentText("Es hora de su medicamento, recuerde que su dosis es de "+dosis+" de "+nombre )
+                    .setContentText(nombre+", recuerde que su dosis es de "+dosis)
                     .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_notification))
                     .setDefaults(Notification.DEFAULT_ALL)
                     .setAutoCancel(true)
@@ -99,7 +99,7 @@ public class NotificationService extends IntentService {
                     .setSound(soundUri)
                     .setAutoCancel(true)
                     .setContentTitle(getString(R.string.app_name)).setCategory(Notification.CATEGORY_SERVICE)
-                    .setContentText("Es hora de su medicamento, recuerde que su dosis es de "+dosis+" de "+nombre ).build();
+                    .setContentText(nombre+", recuerde que su dosis es de "+dosis ).build();
             notificationManager.notify(NOTIFICATION_ID, notification);
         }
     }

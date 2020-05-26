@@ -14,9 +14,9 @@
     <application
         android:name=".Persistencia"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/medicine"
         android:label="proyecto"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/medicine"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name="com.example.project.Splash_screen">
